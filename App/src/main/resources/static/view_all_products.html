@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>View All Products</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f8fafc;
+        }
+
+        header {
+            background: #0f172a;
+            color: white;
+            padding: 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-link {
+            text-decoration: none;
+            background: #2563eb;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1200px;
+            margin: 35px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 14px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 18px;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .message {
+            margin-top: 10px;
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-weight: bold;
+        }
+
+        .empty-message {
+            padding: 12px;
+            border-radius: 8px;
+            background: #f1f5f9;
+            color: #475569;
+            font-weight: bold;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+
+        table, th, td {
+            border: 1px solid #cbd5e1;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #e2e8f0;
+        }
+
+        .product-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            display: block;
+        }
+
+        .url-cell {
+            word-break: break-word;
+            max-width: 250px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>View All Products</h1>
+        <a class="btn-link" href="product_management.html">Back</a>
+    </header>
+
+    <div class="container">
+        <button onclick="viewAllProducts()">Load All Products</button>
+
+        <div id="messageArea"></div>
+        <div id="resultArea"></div>
+    </div>
+
+    <script>
+        async function viewAllProducts() {
+            const messageArea = document.getElementById("messageArea");
+            const resultArea = document.getElementById("resultArea");
+
+            try {
+                const response = await fetch("/viewAllProducts");
+
+                if (!response.ok) {
+                    messageArea.innerHTML =
+                        `<div class="message">Unable to fetch products.</div>`;
+                    resultArea.innerHTML = "";
+                    return;
+                }
+
+                const products = await response.json();
+
+                messageArea.innerHTML =
+                    `<div class="message">All products fetched successfully.</div>`;
+
+                if (!products || products.length === 0) {
+                    resultArea.innerHTML =
+                        `<div class="empty-message">No products found.</div>`;
+                    return;
+                }
+
+                let rows = "";
+
+                products.forEach(product => {
+                    rows += `
+                        <tr>
+                            <td>${product.id ?? ""}</td>
+                            <td>${product.name ?? ""}</td>
+                            <td>${product.description ?? ""}</td>
+                            <td>${product.price ?? ""}</td>
+                            
+                            <td>
+                                <img
+                                    class="product-image"
+                                    src="${product.photoUrl ?? ""}"
+                                    alt="Product Image"
+                                    onerror="this.src='https://via.placeholder.com/100?text=No+Image'"
+                                />
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                resultArea.innerHTML = `
+                    <div class="table-wrapper">
+                        <table>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Product Price</th>
+                                <th>Product Preview</th>
+                            </tr>
+                            ${rows}
+                        </table>
+                    </div>
+                `;
+            } catch (error) {
+                messageArea.innerHTML =
+                    `<div class="message">Something went wrong while fetching products.</div>`;
+                resultArea.innerHTML = "";
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

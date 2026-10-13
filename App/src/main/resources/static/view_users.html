@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>View Profile</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f8fafc;
+        }
+
+        header {
+
+            background: #0f172a;
+
+            color: white;
+
+            padding: 20px 25px;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+        }
+
+        .btn-link {
+
+            text-decoration: none;
+
+            background: #2563eb;
+
+            color: white;
+
+            padding: 10px 16px;
+
+            border-radius: 8px;
+
+            font-weight: bold;
+        }
+
+        .container {
+
+            width: 90%;
+
+            max-width: 800px;
+
+            margin: 35px auto;
+
+            background: white;
+
+            padding: 25px;
+
+            border-radius: 14px;
+
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+
+        .form-group {
+
+            margin-bottom: 15px;
+        }
+
+        label {
+
+            display: block;
+
+            margin-bottom: 6px;
+
+            font-weight: bold;
+        }
+
+        input {
+
+            width: 100%;
+
+            padding: 10px;
+
+            border: 1px solid #cbd5e1;
+
+            border-radius: 8px;
+
+            font-size: 14px;
+        }
+
+        button {
+
+            background: #2563eb;
+
+            color: white;
+
+            border: none;
+
+            padding: 12px 18px;
+
+            border-radius: 8px;
+
+            font-size: 15px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        button:hover {
+
+            opacity: 0.9;
+        }
+
+        .message {
+
+            margin-top: 18px;
+
+            padding: 12px;
+
+            border-radius: 8px;
+
+            background: #dbeafe;
+
+            color: #1d4ed8;
+
+            font-weight: bold;
+        }
+
+        .error {
+
+            background: #fee2e2;
+
+            color: #991b1b;
+        }
+
+        table {
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+            margin-top: 18px;
+        }
+
+        table,
+        th,
+        td {
+
+            border: 1px solid #cbd5e1;
+        }
+
+        th,
+        td {
+
+            padding: 12px;
+
+            text-align: left;
+        }
+
+        th {
+
+            background: #e2e8f0;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <h1>View Profile</h1>
+
+    <a
+        class="btn-link"
+        href="user_management.html">
+        Back
+    </a>
+</header>
+<div class="container">
+    <div class="form-group">
+        <label>User ID </label>
+        <input
+            type="number"
+            id="userId"
+            placeholder="Enter User ID" />
+    </div>
+    <button onclick="searchUser()">Search User</button>
+    <div id="messageArea"></div>
+
+    <div id="resultArea"></div>
+</div>
+<script>
+async function searchUser() {
+    // Get ID entered by user
+    const id =
+        document.getElementById("userId").value;
+    // Check ID
+     
+     
+        const response =
+            await fetch(`/searchUser/${id}`);
+        // Check response
+        if (!response.ok) {
+            document.getElementById("messageArea").innerHTML =
+                `<div class="message error">
+                    Unable to fetch user.
+                 </div>`;
+            document.getElementById("resultArea").innerHTML = "";
+            return;
+        }
+        // Convert JSON response
+
+        const user =
+            await response.json();
+        // Success message
+        document.getElementById("messageArea").innerHTML =
+            `<div class="message">
+                User fetched successfully.
+             </div>`;
+        // Display user
+        document.getElementById("resultArea").innerHTML = `
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Mobile</th>
+                    <th>DOB</th>
+                    <th>Gender</th>
+                    <th>Address</th>
+                    <th>Profile URL</th>
+                </tr>
+                <tr>
+
+                    <td>${user.id ?? id}</td>
+                    <td>${user.username ?? ""}</td>
+                    <td>${user.email ?? ""}</td>
+                    <td>${user.mobile ?? ""}</td>
+                    <td>${user.dob ?? ""}</td>
+                    <td>${user.gender ?? ""}</td>
+                    <td>${user.address ?? ""}</td>
+                    <td>${user.dpUr ?? ""}</td>
+                </tr>
+                 
+            </table>
+        `;
+    }
+     
+</script>
+
+</body>
+</html>

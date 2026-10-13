@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Product Management</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        header {
+            background: #0f172a;
+            color: white;
+            padding: 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            background: #2563eb;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 30px auto;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 14px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        .card h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            color: #475569;
+            margin-bottom: 18px;
+            line-height: 1.5;
+        }
+
+        .card a {
+            text-decoration: none;
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .card a:hover {
+            background: #1d4ed8;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Product Management</h1>
+        <a class="back-btn" href="admin_home.html">Back to Home</a>
+    </header>
+
+    <div class="container">
+        <div class="grid">
+            <div class="card">
+                <h2>Add Product</h2>
+                <p>Create and save a new product into the database.</p>
+                <a href="add_product.html">Open</a>
+            </div>
+
+            <div class="card">
+                <h2>Update Product</h2>
+                <p>Modify the details of an existing product.</p>
+                <a href="update_product.html">Open</a>
+            </div>
+
+            <div class="card">
+                <h2>Delete Product</h2>
+                <p>Delete a product using its product ID.</p>
+                <a href="delete_product.html">Open</a>
+            </div>
+
+            <div class="card">
+                <h2>Search Product</h2>
+                <p>View a single product by entering product ID.</p>
+                <a href="view_product.html">Open</a>
+            </div>
+
+            <div class="card">
+                <h2>View All Products</h2>
+                <p>Fetch and display all products from database.</p>
+                <a href="view_all_products.html">Open</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

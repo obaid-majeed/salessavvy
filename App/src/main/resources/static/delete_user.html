@@ -1,0 +1,86 @@
+ <!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delete User</title>
+<style>
+*{box-sizing:border-box;font-family:Arial,sans-serif}
+body{margin:0;background:#f8fafc;color:#1e293b}
+header{background:#0f172a;color:white;padding:16px 22px;display:flex;justify-content:space-between;align-items:center}
+header h1{margin:0;font-size:24px}
+.btn-link{background:#2563eb;color:white;text-decoration:none;padding:8px 14px;border-radius:6px;font-weight:bold}
+.container{width:90%;max-width:600px;margin:25px auto;background:white;padding:20px;border-radius:10px;box-shadow:0 3px 12px rgba(0,0,0,.08)}
+h2{margin:0 0 10px}
+.form-group{margin-bottom:12px}
+label{display:block;margin-bottom:5px;font-weight:bold}
+input{width:100%;padding:9px;border:1px solid #cbd5e1;border-radius:6px;font-size:14px}
+button{border:0;padding:10px 16px;border-radius:6px;color:white;font-weight:bold;cursor:pointer;background:#dc2626}
+button:hover{opacity:.9}
+.message{margin-top:15px;padding:10px;border-radius:6px;background:#dcfce7;color:#166534;font-weight:bold}
+.error{background:#fee2e2;color:#991b1b}
+</style>
+</head>
+<body>
+
+<header>
+<h1>Delete User</h1>
+<a class="btn-link" href="user_management.html">Back</a>
+</header>
+
+<div class="container">
+<h2>Delete User</h2>
+
+<div class="form-group">
+<label>User ID</label>
+<input type="number" id="id">
+</div>
+
+<button onclick="deleteUser()">Delete User</button>
+
+<div id="messageArea"></div>
+</div>
+
+<script>
+const params=new URLSearchParams(window.location.search);
+const id=params.get("id");
+
+if(!id){
+    document.getElementById("messageArea").innerHTML='<div class="message error">User ID is missing.</div>';
+}else{
+    document.getElementById("id").value=id;
+}
+
+async function deleteUser(){
+    if(!id){
+        document.getElementById("messageArea").innerHTML='<div class="message error">User ID is missing.</div>';
+        return;
+    }
+
+    try{
+        const response=await fetch(`/deleteUser/${id}`,{
+            method:"DELETE"
+        });
+
+        const result=await response.text();
+
+        if(response.ok){
+            document.getElementById("messageArea").innerHTML='<div class="message">User deleted successfully</div>';
+
+            setTimeout(()=>{
+                window.location.href="view_all_users.html";
+            },1000);
+        }else{
+            document.getElementById("messageArea").innerHTML=`<div class="message error">${result}</div>`;
+        }
+    }catch(error){
+        console.error(error);
+        document.getElementById("messageArea").innerHTML='<div class="message error">Server connection failed.</div>';
+    }
+}
+</script>
+
+</body>
+</html>
+ 

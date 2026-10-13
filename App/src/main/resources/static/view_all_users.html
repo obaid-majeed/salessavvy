@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All Users</title>
+<style>
+*{box-sizing:border-box;font-family:Arial,sans-serif}
+body{margin:0;background:#f8fafc;color:#1e293b}
+header{background:#0f172a;color:white;padding:16px 22px;display:flex;justify-content:space-between;align-items:center}
+header h1{margin:0;font-size:24px}
+.btn-link{background:#2563eb;color:white;text-decoration:none;padding:8px 14px;border-radius:6px;font-weight:bold}
+.container{width:95%;max-width:1200px;margin:25px auto;background:white;padding:20px;border-radius:10px;box-shadow:0 3px 12px rgba(0,0,0,.08)}
+h2{margin:0 0 15px;font-size:20px}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px;border-bottom:1px solid #e2e8f0;text-align:left}
+th{background:#f1f5f9}
+.btn{display:inline-block;padding:6px 10px;border-radius:5px;color:white;text-decoration:none;font-size:12px;font-weight:bold;margin-right:3px}
+.view{background:#2563eb}
+.update{background:#16a34a}
+.delete{background:#dc2626}
+.message{text-align:center;padding:15px;font-weight:bold}
+</style>
+</head>
+<body>
+<header>
+<h1>All Users</h1>
+<a class="btn-link" href="user_management.html">Home</a>
+</header>
+<div class="container">
+<h2>Registered Users</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Username</th>
+<th>Email</th>
+<th>Mobile</th>
+<th>DOB</th>
+<th>Gender</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody id="userTableBody"></tbody>
+</table>
+<div id="messageArea" class="message"></div>
+</div>
+<script>
+async function viewAllUsers(){
+    const tableBody=document.getElementById("userTableBody");
+    const messageArea=document.getElementById("messageArea");
+    try{
+        const response=await fetch("/viewAllUsers");
+        if(!response.ok) throw new Error("Failed to load users");
+        const users=await response.json();
+        tableBody.innerHTML="";
+        if(users.length===0){
+            messageArea.textContent="No users found.";
+            return;
+        }
+        users.forEach(user=>{
+            const row=document.createElement("tr");
+            row.innerHTML=`
+                <td>${user.id ?? ""}</td>
+                <td>${user.username ?? ""}</td>
+                <td>${user.email ?? ""}</td>
+                <td>${user.mobile ?? ""}</td>
+                <td>${user.dob ?? ""}</td>
+                <td>${user.gender ?? ""}</td>
+                <td>
+                    <a class="btn view" href="view_users.html?id=${user.id}">View</a>
+                    <a class="btn update" href="update_user.html?id=${user.id}">Update</a>
+                    <a class="btn delete" href="delete_user.html?id=${user.id}">Delete</a>
+                </td>`;
+            tableBody.appendChild(row);
+        });
+    }catch(error){
+        console.error(error);
+        messageArea.textContent="Failed to load users.";
+    }
+}
+viewAllUsers();
+</script>
+</body>
+</html>
