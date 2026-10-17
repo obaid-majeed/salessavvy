@@ -35,7 +35,7 @@
         h2 { margin-top: 0; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 6px; font-weight: bold; }
-        input, textarea {
+        input, textarea, select {
             width: 100%;
             padding: 10px;
             border: 1px solid #cbd5e1;
@@ -57,130 +57,120 @@
             margin-top: 18px;
             padding: 12px;
             border-radius: 8px;
-            background: #dcfce7;
-            color: #166534;
             font-weight: bold;
         }
+        .success { background: #dcfce7; color: #166534; }
+        .error { background: #fee2e2; color: #991b1b; }
     </style>
 </head>
 <body>
     <header>
         <h1>Add Profile</h1>
-        <a class="btn-link" href="user_management.html">Back</a>
+        <a class="btn-link" href="view_product.html">Back</a>
     </header>
 
     <div class="container">
         <h2>Enter Profile Details</h2>
 
         <div class="form-group">
-            <label>Name</label>
-            <input type="text" id="username" placeholder="Enter your username"/>
+            <label>Full Name</label>
+            <input type="text" id="name" placeholder="Enter your full name" required />
         </div>
 
-         <div class="form-group">
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="username" placeholder="Enter your username" required />
+        </div>
+
+        <div class="form-group">
             <label>Email</label>
-            <input type="text" id="email" placeholder="Enter your email"/>
+            <input type="email" id="email" placeholder="Enter your email" />
         </div>
         
         <div class="form-group">
             <label>Password</label>
-            <input type="password" id="password" placeholder="Enter your password"/>
+            <input type="password" id="password" placeholder="Enter your password" required />
+        </div>
+        
+        <div class="form-group">
+            <label>Role</label>
+            <input type="text" id="role" placeholder="e.g. ROLE_USER" required />
         </div>
         
         <div class="form-group">
             <label>Mobile</label>
-            <input type="number" id="number" />
+            <input type="tel" id="mobile" placeholder="Enter mobile number" />
         </div>
         
         <div class="form-group">
-            <label>DOB</label>
-            <input type="date" id="date" />
+            <label>Date of Birth</label>
+            <input type="date" id="dob" />
         </div>
-  
         
         <div class="form-group">
             <label>Gender</label>
-            <select id="gender" name="gender" placeholder="Select your role">
-            <option value="MALE">Male</option>
-            <option value="MALE">Female</option>
-            <option value="OTHERS">Other</option>
-             </select>
-         </div>
+            <select id="gender">
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+                <option value="OTHERS">Other</option>
+            </select>
+        </div>
         
         <div class="form-group">
             <label>Address</label>
-            <input type="text" id="address" />
+            <textarea id="address" placeholder="Enter address"></textarea>
         </div>
         
         <div class="form-group">
-            <label>Profile Url</label>
-            <input type="text" id="dpUr" />
+            <label>Profile Image URL</label>
+            <input type="url" id="dpUrl" placeholder="https://example.com/photo.jpg" />
         </div>
         
-        <button onclick="register()"> Register User</button>
-        
+        <button onclick="register()">Register User</button>
+        <div id="messageArea"></div>
     </div>
 
-     
 <script>
-    async function register() {
+async function register() {
+    const messageArea = document.getElementById("messageArea");
 
-        const user = {
-            username: document.getElementById("username").value,
-            email: document.getElementById("email").value,
-            password: document.getElementById("password").value,
-            mobile: document.getElementById("number").value,
-            dob: document.getElementById("date").value,
-            gender: document.getElementById("gender").value,
-            address: document.getElementById("address").value,
-            dpUr: document.getElementById("dpUr").value
-        };
+    const user = {
+        name: document.getElementById("name").value.trim(),
+        username: document.getElementById("username").value.trim(),
+        email: document.getElementById("email").value.trim(),
+        password: document.getElementById("password").value,
+        role: document.getElementById("role").value.trim(),
+        mobile: document.getElementById("mobile").value.trim(),
+        dob: document.getElementById("dob").value || null,
+        gender: document.getElementById("gender").value,
+        address: document.getElementById("address").value.trim(),
+        dpUrl: document.getElementById("dpUrl").value.trim()
+    };
 
-        try {
+    try {
+        const response = await fetch("/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(user)
+        });
 
-            const response = await fetch("/register", {
-                method: "POST",
+        const result = await response.text();
 
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify(user)
-            });
-
-            const result = await response.text();
-
-            // Create message area if it doesn't exist
-            let messageArea = document.getElementById("messageArea");
-
-            if (!messageArea) {
-                messageArea = document.createElement("div");
-                messageArea.id = "messageArea";
-                document.querySelector(".container").appendChild(messageArea);
-            }
-
-            messageArea.innerHTML =
-                `<div class="message">${result}</div>`;
-
-        } catch (error) {
-
-            console.error("Error:", error);
-
-            let messageArea = document.getElementById("messageArea");
-
-            if (!messageArea) {
-                messageArea = document.createElement("div");
-                messageArea.id = "messageArea";
-                document.querySelector(".container").appendChild(messageArea);
-            }
-
-            messageArea.innerHTML =
-                `<div class="message">
-                    Failed to register user.
-                 </div>`;
+        if (response.ok) {
+            messageArea.innerHTML = `<div class="message success">${result}. Redirecting to login...</div>`;
+            
+            // Redirect to login page after 1.5 seconds
+            setTimeout(() => {
+                window.location.href = "login.html";
+            }, 1500);
+        } else {
+            messageArea.innerHTML = `<div class="message error">Error: ${result}</div>`;
         }
+    } catch (error) {
+        console.error("Error:", error);
+        messageArea.innerHTML = `<div class="message error">Failed to connect to the server.</div>`;
     }
+}
 </script>
-     
 </body>
 </html>

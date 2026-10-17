@@ -5,9 +5,11 @@ import java.time.LocalDate;
 import com.appplication.entity.Gender;
 
 public class UsersRequestDto {
+	private String name;
 	private String username;
     private String email;
     private String password;
+    private String role;
     private String mobile;
     private LocalDate dob;
     private Gender gender;
@@ -17,17 +19,25 @@ public class UsersRequestDto {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-	public UsersRequestDto(String username, String email, String password, String mobile, LocalDate dob, Gender gender,
-			String address, String dpUrl) {
+	public UsersRequestDto(String name, String username, String email, String password, String role, String mobile,
+			LocalDate dob, Gender gender, String address, String dpUrl) {
 		super();
+		this.name = name;
 		this.username = username;
 		this.email = email;
 		this.password = password;
+		this.role = role;
 		this.mobile = mobile;
 		this.dob = dob;
 		this.gender = gender;
 		this.address = address;
 		this.dpUrl = dpUrl;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
 	}
 	public String getUsername() {
 		return username;
@@ -46,6 +56,12 @@ public class UsersRequestDto {
 	}
 	public void setPassword(String password) {
 		this.password = password;
+	}
+	public String getRole() {
+		return role;
+	}
+	public void setRole(String role) {
+		this.role = role;
 	}
 	public String getMobile() {
 		return mobile;
@@ -77,11 +93,5 @@ public class UsersRequestDto {
 	public void setDpUrl(String dpUrl) {
 		this.dpUrl = dpUrl;
 	}
-	@Override
-	public String toString() {
-		return "UsersRequestDto [username=" + username + ", email=" + email + ", password=" + password + ", mobile="
-				+ mobile + ", dob=" + dob + ", gender=" + gender + ", address=" + address + ", dpUrl=" + dpUrl + "]";
-	}
-    
-    
+ 	 
 }

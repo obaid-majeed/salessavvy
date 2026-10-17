@@ -1,10 +1,16 @@
 package com.appplication.service;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.appplication.dto.UsersRequestDto;
 import com.appplication.dto.UsersResponseDto;
@@ -12,138 +18,161 @@ import com.appplication.dto.UsersUpdateRequestDto;
 import com.appplication.entity.Users;
 import com.appplication.repository.UsersRepository;
 
- 
-
 @Service
-public class UserServiceImplementation implements UsersService {
-     
-    //private final Key SIGNING_KEY;
-    private final UsersRepository repo;
+@Transactional
+public class UserServiceImplementation implements UsersService, UserDetailsService {
+
+    private final UsersRepository usersRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImplementation(UsersRepository repo, PasswordEncoder passwordEncoder) {
-        this.repo = repo;
+    public UserServiceImplementation(UsersRepository usersRepository,
+                                     PasswordEncoder passwordEncoder) {
+        this.usersRepository = usersRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
+    // --- Spring Security UserDetailsService implementation ---
     @Override
-    public String register(UsersRequestDto userDto) {
+    @Transactional(readOnly = true)
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Users user = usersRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        if (repo.existsByUsername(userDto.getUsername())) {
-            return "Username already exists";
+        String role = user.getRole();
+        if (role == null || role.isBlank()) {
+            role = "ROLE_USER";
+        } else if (!role.startsWith("ROLE_")) {
+            role = "ROLE_" + role;
         }
 
-        if (repo.existsByEmail(userDto.getEmail())) {
-            return "Email already exists";
+        return new User(
+                user.getUsername(),
+                user.getPassword(),
+                Collections.singletonList(new SimpleGrantedAuthority(role))
+        );
+    }
+
+    // --- Business Methods ---
+    @Override
+    public String register(UsersRequestDto request) {
+        validateUserRequest(request);
+
+        if (usersRepository.existsByUsername(request.getUsername())) {
+            throw new IllegalArgumentException("Username already exists");
         }
 
-        if (repo.existsByMobile(userDto.getMobile())) {
-            return "Mobile number already exists";
+        if (request.getEmail() != null && !request.getEmail().isBlank()
+                && usersRepository.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException("Email already exists");
+        }
+
+        if (request.getMobile() != null && !request.getMobile().isBlank()
+                && usersRepository.existsByMobile(request.getMobile())) {
+            throw new IllegalArgumentException("Mobile number already exists");
         }
 
         Users user = new Users();
-        user.setUsername(userDto.getUsername());
-        user.setEmail(userDto.getEmail());
-        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        user.setMobile(userDto.getMobile());
-        user.setDob(userDto.getDob());
-        user.setGender(userDto.getGender());
-        user.setAddress(userDto.getAddress());
-        user.setDpUrl(userDto.getDpUrl());
+        user.setName(request.getName());
+        user.setUsername(request.getUsername());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole("USER");
+        user.setEmail(request.getEmail());
+        user.setMobile(request.getMobile());
+        user.setDob(request.getDob());
+        user.setGender(request.getGender());
+        user.setAddress(request.getAddress());
+        user.setDpUrl(request.getDpUrl());
 
-        repo.save(user);
-
+        usersRepository.save(user);
         return "User registered successfully";
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UsersResponseDto searchUser(Long id) {
-        Optional<Users> optionalUser = repo.findById(id);
-
-        if (optionalUser.isEmpty()) {
-            return null;
-        }
-
-        Users user = optionalUser.get();
+        Users user = usersRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + id));
         return mapToResponseDto(user);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<UsersResponseDto> viewAllUsers() {
-        List<Users> users = repo.findAll();
-
-        return users.stream()
+        return usersRepository.findAll()
+                .stream()
                 .map(this::mapToResponseDto)
                 .toList();
     }
 
     @Override
-    public UsersResponseDto updateUser(UsersUpdateRequestDto userDto) {
-
-        if (userDto.getId() == null) {
-            throw new RuntimeException("User id is required");
+    public UsersResponseDto updateUser(UsersUpdateRequestDto request) {
+        if (request == null || request.getId() == null) {
+            throw new IllegalArgumentException("User ID is required");
         }
 
-        Optional<Users> optionalUser = repo.findById(userDto.getId());
+        Users user = usersRepository.findById(request.getId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + request.getId()));
 
-        if (optionalUser.isEmpty()) {
-            throw new RuntimeException("User not found");
+        if (request.getUsername() != null && !request.getUsername().isBlank()
+                && !request.getUsername().equals(user.getUsername())) {
+            if (usersRepository.existsByUsername(request.getUsername())) {
+                throw new IllegalArgumentException("Username already exists");
+            }
+            user.setUsername(request.getUsername());
         }
 
-        Users existingUser = optionalUser.get();
-
-        if (!existingUser.getUsername().equals(userDto.getUsername())
-                && repo.existsByUsername(userDto.getUsername())) {
-            throw new RuntimeException("Username already exists");
+        if (request.getEmail() != null && !request.getEmail().isBlank()
+                && !request.getEmail().equals(user.getEmail())) {
+            if (usersRepository.existsByEmail(request.getEmail())) {
+                throw new IllegalArgumentException("Email already exists");
+            }
+            user.setEmail(request.getEmail());
         }
 
-        if (!existingUser.getEmail().equals(userDto.getEmail())
-                && repo.existsByEmail(userDto.getEmail())) {
-            throw new RuntimeException("Email already exists");
+        if (request.getMobile() != null && !request.getMobile().isBlank()
+                && !request.getMobile().equals(user.getMobile())) {
+            if (usersRepository.existsByMobile(request.getMobile())) {
+                throw new IllegalArgumentException("Mobile number already exists");
+            }
+            user.setMobile(request.getMobile());
         }
 
-        if (!existingUser.getMobile().equals(userDto.getMobile())
-                && repo.existsByMobile(userDto.getMobile())) {
-            throw new RuntimeException("Mobile number already exists");
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
 
-        existingUser.setUsername(userDto.getUsername());
-        existingUser.setEmail(userDto.getEmail());
-        existingUser.setMobile(userDto.getMobile());
-        existingUser.setDob(userDto.getDob());
-        existingUser.setGender(userDto.getGender());
-        existingUser.setAddress(userDto.getAddress());
-        existingUser.setDpUrl(userDto.getDpUrl());
+        if (request.getDob() != null) user.setDob(request.getDob());
+        if (request.getGender() != null) user.setGender(request.getGender());
+        if (request.getAddress() != null) user.setAddress(request.getAddress());
+        if (request.getDpUrl() != null) user.setDpUrl(request.getDpUrl());
 
-        if (userDto.getPassword() != null && !userDto.getPassword().isBlank()) {
-            existingUser.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        }
-
-        Users updatedUser = repo.save(existingUser);
-
-        return mapToResponseDto(updatedUser);
+        return mapToResponseDto(usersRepository.save(user));
     }
 
     @Override
     public String deleteUser(Long id) {
-        if (!repo.existsById(id)) {
-            return "User not found";
-        }
-
-        repo.deleteById(id);
+        Users user = usersRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + id));
+        usersRepository.delete(user);
         return "User deleted successfully";
     }
 
+    private void validateUserRequest(UsersRequestDto request) {
+        if (request == null) throw new IllegalArgumentException("User request is required");
+        if (request.getUsername() == null || request.getUsername().isBlank()) throw new IllegalArgumentException("Username is required");
+        if (request.getPassword() == null || request.getPassword().isBlank()) throw new IllegalArgumentException("Password is required");
+    }
+
     private UsersResponseDto mapToResponseDto(Users user) {
-        UsersResponseDto dto = new UsersResponseDto();
-        dto.setId(user.getId());
-        dto.setUsername(user.getUsername());
-        dto.setEmail(user.getEmail());
-        dto.setMobile(user.getMobile());
-        dto.setDob(user.getDob());
-        dto.setGender(user.getGender());
-        dto.setAddress(user.getAddress());
-        dto.setDpUrl(user.getDpUrl());
-        return dto;
+        UsersResponseDto response = new UsersResponseDto();
+        response.setId(user.getId());
+        response.setUsername(user.getUsername());
+        response.setEmail(user.getEmail());
+        response.setMobile(user.getMobile());
+        response.setDob(user.getDob());
+        response.setGender(user.getGender());
+        response.setAddress(user.getAddress());
+        response.setDpUrl(user.getDpUrl());
+        return response;
     }
 }

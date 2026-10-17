@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In | Customer Portal</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #06261f;
+      color: #0f172a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 30px 16px;
+    }
+
+    /* Amazon-style Brand Header */
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #2563eb;
+      text-decoration: none;
+      margin-bottom: 24px;
+    }
+
+    .brand-logo span {
+      color: #3b82f6;
+    }
+
+    /* Main Auth Box */
+    .auth-card {
+      width: 100%;
+      max-width: 380px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 32px 28px;
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+    }
+
+    .auth-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 20px;
+    }
+
+    /* Notification Box */
+    .alert-banner {
+      display: none;
+      background: #fef2f2;
+      border-left: 4px solid #ef4444;
+      padding: 10px 14px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #991b1b;
+      margin-bottom: 18px;
+      line-height: 1.4;
+    }
+
+    /* Form Fields */
+    .form-group {
+      margin-bottom: 18px;
+      text-align: left;
+    }
+
+    .label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .forgot-link {
+      font-size: 12px;
+      color: #2563eb;
+      text-decoration: none;
+    }
+
+    .forgot-link:hover {
+      text-decoration: underline;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      height: 42px;
+      padding: 10px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #0f172a;
+      background-color: #fff;
+      transition: all 0.2s ease-in-out;
+      outline: none;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    /* Primary Blue Action Button */
+    .btn-primary {
+      width: 100%;
+      height: 42px;
+      background: #2563eb;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border: 1px solid #1d4ed8;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+    }
+
+    .btn-primary:active {
+      background: #1e40af;
+    }
+
+    /* Amazon-style Terms Disclaimer */
+    .auth-terms {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 18px;
+      line-height: 1.5;
+    }
+
+    .auth-terms a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+
+    .auth-terms a:hover {
+      text-decoration: underline;
+    }
+
+    /* Divider Row */
+    .divider {
+      position: relative;
+      text-align: center;
+      margin: 28px 0 18px;
+    }
+
+    .divider::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: #e2e8f0;
+      z-index: 1;
+    }
+
+    .divider span {
+      position: relative;
+      z-index: 2;
+      background: #f8fafc;
+      padding: 0 10px;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    /* Secondary New User Button */
+    .btn-secondary {
+      width: 100%;
+      max-width: 380px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+      color: #0f172a;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+
+    /* Footer Links */
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    footer .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 12px;
+    }
+
+    footer a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Brand Heading -->
+  <a href="#" class="brand-logo">
+    Sales<span>Savvy</span>
+  </a>
+
+  <!-- Sign In Card -->
+  <div class="auth-card">
+    <h1 class="auth-title">Sign in</h1>
+
+    <!-- Error Banner -->
+    <div id="errorBanner" class="alert-banner"></div>
+
+    <form id="loginForm" onsubmit="event.preventDefault(); login();">
+      <div class="form-group">
+        <label for="u">Username or Email</label>
+        <div class="input-wrapper">
+          <input id="u" type="text" autocomplete="username" required placeholder="Enter your username" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="label-row">
+          <label for="p">Password</label>
+          <a href="#" class="forgot-link">Forgot password?</a>
+        </div>
+        <div class="input-wrapper">
+          <input id="p" type="password" autocomplete="current-password" required placeholder="Enter password" />
+        </div>
+      </div>
+
+      <button id="loginBtn" type="submit" class="btn-primary">Sign in</button>
+    </form>
+
+    <p class="auth-terms">
+      By continuing, you agree to our <a href="#">Conditions of Use</a> and <a href="#">Privacy Notice</a>.
+    </p>
+  </div>
+
+  <!-- New Customer Section -->
+  <div class="divider" style="width: 100%; max-width: 380px;">
+    <span>New to our store?</span>
+  </div>
+
+  <a href="add_user.html" class="btn-secondary">Create your account</a>
+
+  <footer>
+    <div class="footer-links">
+      <a href="#">Conditions of Use</a>
+      <a href="#">Privacy Notice</a>
+      <a href="#">Help Center</a>
+    </div>
+    <p>&copy; 2026 SalesSavvy, Inc. or its affiliates</p>
+  </footer>
+
+  <script>
+    async function login() {
+      const u = document.getElementById('u');
+      const p = document.getElementById('p');
+      const btn = document.getElementById('loginBtn');
+      const errorBanner = document.getElementById('errorBanner');
+
+      errorBanner.style.display = 'none';
+      btn.innerText = 'Signing in...';
+      btn.disabled = true;
+
+      try {
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: u.value.trim(), password: p.value })
+        });
+
+        if (!response.ok) {
+          const errMsg = response.status === 401 || response.status === 403 
+            ? 'Invalid username or password. Please verify and try again.' 
+            : 'Login service encountered an issue. Please try again later.';
+          showError(errMsg);
+          return;
+        }
+
+        const data = await response.json();
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('role', data.role);
+        localStorage.setItem('username', data.username || u.value.trim());
+
+        // Redirect Admin to admin home, and Customer directly to view_product.html
+        const role = (data.role || '').toUpperCase();
+        if (role.includes('ADMIN')) {
+          window.location.href = 'admin_home.html';
+        } else {
+          window.location.href = 'view_all_products.html';
+        }
+
+      } catch (err) {
+        showError('Network error: Unable to reach the server.');
+      } finally {
+        btn.innerText = 'Sign in';
+        btn.disabled = false;
+      }
+    }
+
+    function showError(message) {
+      const errorBanner = document.getElementById('errorBanner');
+      errorBanner.textContent = message;
+      errorBanner.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

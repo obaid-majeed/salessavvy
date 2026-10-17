@@ -1,86 +1,78 @@
-package com.appplication.service;
+ package com.appplication.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.appplication.dto.ProductRequestDto;
 import com.appplication.entity.Products;
 import com.appplication.repository.ProductRepository;
-import com.appplication.dto.ProductRequestDto;
 
 @Service
-public class ProductServiceImplementation implements ProductService
-                 {
-          
-	ProductRepository productRepository;
+@Transactional
+public class ProductServiceImplementation implements ProductService {
 
-	public ProductServiceImplementation(ProductRepository productRepository) {
-		super();
-		this.productRepository = productRepository;
-	}
-	
-	 
+    private final ProductRepository productRepository;
 
-	 
-	public String addProduct(ProductRequestDto product) {
-		Products p = new Products();
- 		p.setName(product.getName());
-		p.setPrice(product.getPrice());
-		p.setDescription(product.getDescription());
-		p.setPhotoUrl(product.getPhotoUrl());
-		productRepository.save(p);
-		return "Product Added";
-	}
+    public ProductServiceImplementation(
+            ProductRepository productRepository) {
+        this.productRepository = productRepository;
+    }
 
-	 
-	@Override
-	public Products viewProduct(Long prodId) {
-	    return productRepository.findById(prodId)
-	               .orElseThrow(() -> new RuntimeException("Product not found with id: " + prodId));
-	}
+    @Override
+    public String addProduct(ProductRequestDto request) {
+        Products product = new Products(
+                request.getName(),
+                request.getDescription(),
+                request.getPrice(),
+                request.getStock(),
+                request.getCategory(),
+                request.getImageUrl()
+        );
 
-	 
-	 
-	public String updateProduct(Long id, ProductRequestDto retrieveProducts) {
-	    Optional<Products> optionalProduct = productRepository.findById(id);
-	    
-	    if (optionalProduct.isPresent()) {
-	        Products existingProduct = optionalProduct.get(); // 1. Unwrap the entity
-	        
-	        // 2. Update fields (do NOT alter existingProduct.setId)
-	        existingProduct.setName(retrieveProducts.getName());
-	        existingProduct.setPrice(retrieveProducts.getPrice());
-	        existingProduct.setDescription(retrieveProducts.getDescription());
-	        existingProduct.setPhotoUrl(retrieveProducts.getPhotoUrl());
-	        
-	        // 3. Save the unwrapped entity
-	        productRepository.save(existingProduct);
-	        return "Product updated successfully";
-	    }
-	    
-	    return "Product not found with id: " + id;
-	}
-	
+        productRepository.save(product);
+        return "Product added successfully";
+    }
 
-	 
-	public boolean deleteProduct(Long id) {
-		  if (productRepository.existsById(id)) {
-			  productRepository.deleteById(id);
-			  return true;
-		  }
-		  if (!productRepository.existsById(id)) {
-			  throw new RuntimeException("Product not found" + id);
-		  }
-		return false;
-	}
+    @Override
+    @Transactional(readOnly = true)
+    public Products viewProduct(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() ->
+                    new RuntimeException("Product not found: " + id));
+    }
 
- 
-	  
-	public List<Products> viewAllProducts() {
-	return	productRepository.findAll();
-	}
+    @Override
+    public String updateProduct(Long id, ProductRequestDto request) {
+        Products product = productRepository.findById(id)
+                .orElseThrow(() ->
+                    new RuntimeException("Product not found: " + id));
 
-	
+        product.setName(request.getName());
+        product.setDescription(request.getDescription());
+        product.setPrice(request.getPrice());
+        product.setStock(request.getStock());
+        product.setCategory(request.getCategory());
+        product.setImageUrl(request.getImageUrl());
+
+        productRepository.save(product);
+        return "Product updated successfully";
+    }
+
+    @Override
+    public boolean deleteProduct(Long id) {
+        Products product = productRepository.findById(id)
+                .orElseThrow(() ->
+                    new RuntimeException("Product not found: " + id));
+
+        productRepository.delete(product);
+        return true;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Products> viewAllProducts() {
+        return productRepository.findAll();
+    }
 }
-
